@@ -4,10 +4,10 @@
 \alias{PAPE}
 \title{Estimation of the Population Average Prescription Effect in Randomized Experiments}
 \usage{
-PAPE(Tr, That, Y, plim = NA, centered = TRUE)
+PAPE(T, That, Y, plim = NA, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A vector of the unit-level binary treatment that would have been assigned by the
 individualized treatment rule. If \code{plim} is specified, please ensure
@@ -32,10 +32,10 @@ This function estimates the Population Average Prescription Effect with and with
 constraint. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 Y = c(4,5,0,2,4,1,-4,3)
-papelist <- PAPE(Tr,That,Y)
+papelist <- PAPE(T,That,Y)
 papelist$pape
 papelist$sd
 }

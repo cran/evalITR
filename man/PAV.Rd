@@ -4,10 +4,10 @@
 \alias{PAV}
 \title{Estimation of the Population Average Value in Randomized Experiments}
 \usage{
-PAV(Tr, That, Y, centered = TRUE)
+PAV(T, That, Y, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A vector of the unit-level binary treatment that would have been assigned by the
 individualized treatment rule. If \code{plim} is specified, please ensure
@@ -27,10 +27,10 @@ of PAV.}
 This function estimates the Population Average Value. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 Y = c(4,5,0,2,4,1,-4,3)
-pavlist <- PAV(Tr,That,Y)
+pavlist <- PAV(T,That,Y)
 pavlist$pav
 pavlist$sd
 }

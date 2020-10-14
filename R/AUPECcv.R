@@ -4,7 +4,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param tau A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold.
 #' @param Y The outcome variable of interest.
 #' @param ind A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.
@@ -14,11 +14,11 @@
 #' AUPEC.} \item{sd}{The estimated standard deviation
 #' of AUPEC.}
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' tau = matrix(c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9),nrow = 8, ncol = 2)
 #' Y = c(4,5,0,2,4,1,-4,3)
 #' ind = c(rep(1,4),rep(2,4))
-#' aupeclist <- AUPECcv(Tr, tau, Y, ind)
+#' aupeclist <- AUPECcv(T, tau, Y, ind)
 #' aupeclist$aupec
 #' aupeclist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
@@ -26,20 +26,20 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export AUPECcv
-AUPECcv <- function (Tr, tau, Y, ind, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
   }
-  if ((length(Tr)!=dim(tau)[1]) | (dim(tau)[1]!=length(Y))) {
+  if ((length(T)!=dim(tau)[1]) | (dim(tau)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   tau=as.matrix(tau)
   Y=as.numeric(Y)
   if (centered) {
@@ -53,7 +53,7 @@ AUPECcv <- function (Tr, tau, Y, ind, centered = TRUE) {
   covarsum1 = 0
   covarsum2 = c()
   for (i in 1:nfolds) {
-    Tind = Tr[ind==i]
+    Tind = T[ind==i]
     tauind = tau[ind==i,i]
     Yind = Y[ind==i]
     n=length(Yind)

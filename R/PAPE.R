@@ -5,7 +5,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A vector of the unit-level binary treatment that would have been assigned by the
 #' individualized treatment rule. If \code{plim} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
@@ -19,10 +19,10 @@
 #' Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
 #' of PAPE.}
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' That = c(0,1,1,0,0,1,1,0)
 #' Y = c(4,5,0,2,4,1,-4,3)
-#' papelist <- PAPE(Tr,That,Y)
+#' papelist <- PAPE(T,That,Y)
 #' papelist$pape
 #' papelist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
@@ -30,21 +30,21 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPE
-PAPE <- function (Tr, That, Y, plim = NA, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
   if (!(identical(as.numeric(That),as.numeric(as.logical(That))))) {
     stop("That should be binary.")
   }
-  if ((length(Tr)!=length(That)) | (length(That)!=length(Y))) {
+  if ((length(T)!=length(That)) | (length(That)!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  if (!is.na(plim) & (sum(That)>=floor(length(Tr)*plim)+1)) {
-    stop("The number of treated units in That does not match the budget constraint.")
+  if (!is.na(plim) & (sum(That)>floor(length(T)*plim)+1)) {
+    stop("The number of treated units in That should be below or equal to plim.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
@@ -52,7 +52,7 @@ PAPE <- function (Tr, That, Y, plim = NA, centered = TRUE) {
   if (!is.na(plim) & ((plim<0) | (plim>1))) {
     stop("Budget constraint should be between 0 and 1")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   That=as.numeric(That)
   Y=as.numeric(Y)
   if (centered) {
@@ -60,29 +60,29 @@ PAPE <- function (Tr, That, Y, plim = NA, centered = TRUE) {
   }
   if (is.na(plim)) {
     n=length(Y)
-    n1=sum(Tr)
+    n1=sum(T)
     n0=n-n1
     n1h=sum(That)
     n0h=n-n1h
     probs=sum(That)/n
-    SAPE=n/(n-1)*(1/n1*sum(Tr*That*Y)+1/n0*sum(Y*(1-Tr)*(1-That))-n1h/n1/n*sum(Y*Tr)-n0h/n0/n*sum(Y*(1-Tr)))
-    Sf1=var(((That-probs)*Y)[Tr==1])
-    Sf0=var(((That-probs)*Y)[Tr==0])
-    SATE=1/n1*sum(Tr*Y)-1/n0*(sum((1-Tr)*Y))
+    SAPE=n/(n-1)*(1/n1*sum(T*That*Y)+1/n0*sum(Y*(1-T)*(1-That))-n1h/n1/n*sum(Y*T)-n0h/n0/n*sum(Y*(1-T)))
+    Sf1=var(((That-probs)*Y)[T==1])
+    Sf0=var(((That-probs)*Y)[T==0])
+    SATE=1/n1*sum(T*Y)-1/n0*(sum((1-T)*Y))
     covarterm=1/n^2*(SAPE^2+2*(n-1)*SAPE*SATE*(2*probs-1)-(1-probs)*probs*n*SATE^2)
     varexp=(n/(n-1))^2*(Sf1/n1+Sf0/n0+covarterm)
     return(list(pape=SAPE,sd=sqrt(max(varexp,0))))
   } else {
     n=length(Y)
-    n1=sum(Tr)
+    n1=sum(T)
     n0=n-n1
     n1h=sum(That)
     n0h=n-n1h
-    SAPEfp=1/n1*sum(Tr*That*Y)+1/n0*sum(Y*(1-Tr)*(1-That))-plim/n1*sum(Y*Tr)-(1-plim)/n0*sum(Y*(1-Tr))
-    Sfp1=var(((That-plim)*Y)[Tr==1])
-    Sfp0=var(((That-plim)*Y)[Tr==0])
-    kf1=mean(Y[Tr==1 & That==1])-mean(Y[Tr==0 & That==1])
-    kf0=mean(Y[Tr==1 & That==0])-mean(Y[Tr==0 & That==0])
+    SAPEfp=1/n1*sum(T*That*Y)+1/n0*sum(Y*(1-T)*(1-That))-plim/n1*sum(Y*T)-(1-plim)/n0*sum(Y*(1-T))
+    Sfp1=var(((That-plim)*Y)[T==1])
+    Sfp0=var(((That-plim)*Y)[T==0])
+    kf1=mean(Y[T==1 & That==1])-mean(Y[T==0 & That==1])
+    kf0=mean(Y[T==1 & That==0])-mean(Y[T==0 & That==0])
     varfp=Sfp1/n1+Sfp0/n0+floor(n*plim)*(n-floor(n*plim))/(n^2*(n-1))*((2*plim-1)*kf1^2-2*plim*kf1*kf0)
     return(list(pape=SAPEfp,sd=sqrt(max(varfp,0))))
   }

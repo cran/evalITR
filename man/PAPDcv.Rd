@@ -4,10 +4,10 @@
 \alias{PAPDcv}
 \title{Estimation of the Population Average Prescription Difference in Randomized Experiments Under Cross Validation}
 \usage{
-PAPDcv(Tr, Thatfp, Thatgp, Y, ind, plim, centered = TRUE)
+PAPDcv(T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{Thatfp}{A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the first
 individualized treatment rule generated in the \code{i}th fold. Please ensure
@@ -36,12 +36,12 @@ of PAPD.}
 This function estimates the Population Average Prescription Difference The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 That2 = matrix(c(0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0), nrow = 8, ncol = 2)
 Y = c(4,5,0,2,4,1,-4,3)
 ind = c(rep(1,4),rep(2,4))
-papdlist <- PAPDcv(Tr, That, That2, Y, ind, plim = 0.5)
+papdlist <- PAPDcv(T, That, That2, Y, ind, plim = 0.5)
 papdlist$papd
 papdlist$sd
 }

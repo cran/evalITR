@@ -4,10 +4,10 @@
 \alias{AUPECcv}
 \title{Estimation of the Area Under Prescription Evaluation Curve (AUPEC) in Randomized Experiments Under Cross Validation}
 \usage{
-AUPECcv(Tr, tau, Y, ind, centered = TRUE)
+AUPECcv(T, tau, Y, ind, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{tau}{A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold.}
 
@@ -27,11 +27,11 @@ of AUPEC.}
 This function estimates AUPEC. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 tau = matrix(c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9),nrow = 8, ncol = 2)
 Y = c(4,5,0,2,4,1,-4,3)
 ind = c(rep(1,4),rep(2,4))
-aupeclist <- AUPECcv(Tr, tau, Y, ind)
+aupeclist <- AUPECcv(T, tau, Y, ind)
 aupeclist$aupec
 aupeclist$sd
 }

@@ -5,7 +5,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
 #' individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
@@ -20,11 +20,11 @@
 #' Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
 #' of PAPE.}
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 #' Y = c(4,5,0,2,4,1,-4,3)
 #' ind = c(rep(1,4),rep(2,4))
-#' papelist <- PAPEcv(Tr, That, Y, ind)
+#' papelist <- PAPEcv(T, That, Y, ind)
 #' papelist$pape
 #' papelist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
@@ -33,9 +33,9 @@
 #' @keywords evaluation
 #' @importFrom stats var quantile rbinom
 #' @export PAPEcv
-PAPEcv <- function (Tr, That, Y, ind, plim = NA, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
@@ -43,19 +43,19 @@ PAPEcv <- function (Tr, That, Y, ind, plim = NA, centered = TRUE) {
   if (!(identical(as.numeric(That),as.numeric(as.logical(That))))) {
     stop("That should be binary.")
   }
-  if ((length(Tr)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
+  if ((length(T)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (!is.na(plim) & (max(apply(That,2,sum))>=floor(length(Tr)*plim)+1)) {
-    stop("The number of treated units in That does not match the budget constraint.")
+  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(That[ind==i, i])))>floor(length(T)*plim)+1)) {
+    stop("The number of treated units in That should be below or equal to plim.")
   }
   if (!is.na(plim) & ((plim<0) | (plim>1))) {
     stop("Budget constraint should be between 0 and 1")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   That=as.matrix(That)
   Y=as.numeric(Y)
   if (centered) {
@@ -64,12 +64,12 @@ PAPEcv <- function (Tr, That, Y, ind, plim = NA, centered = TRUE) {
   if (is.na(plim)) {
     nfolds = max(ind)
     n = length(Y)
-    n1 = sum(Tr)
+    n1 = sum(T)
     n0 = n - n1
     papefold = c()
     pF = mean(That)
-    tau = 1/n1*sum(Tr*Y)-1/n0*(sum((1-Tr)*Y))
-    eitaui = sum(That*Y*Tr)/(n1*nfolds)-sum(That*Y*(1-Tr))/(n0*nfolds)
+    tau = 1/n1*sum(T*Y)-1/n0*(sum((1-T)*Y))
+    eitaui = sum(That*Y*T)/(n1*nfolds)-sum(That*Y*(1-T))/(n0*nfolds)
     Sf1 = 0
     Sf0 = 0
     covij = 0
@@ -79,24 +79,24 @@ PAPEcv <- function (Tr, That, Y, ind, plim = NA, centered = TRUE) {
     n1n0 = n0*n1
     n0n0 = n0*(n0-1)
     Thatmean = apply(That,1,mean)
-    ThatYT1mean = apply(That*Y*Tr,1,mean)
-    ThatYT0mean = apply(That*Y*(1-Tr),1,mean)
+    ThatYT1mean = apply(That*Y*T,1,mean)
+    ThatYT0mean = apply(That*Y*(1-T),1,mean)
     for (i in 1:nfolds) {
-      output = PAPE(Tr[ind==i],That[ind==i,i],Y[ind==i])
-      m = length(Tr[ind==i])
-      m1 = sum(Tr[ind==i])
+      output = PAPE(T[ind==i],That[ind==i,i],Y[ind==i])
+      m = length(T[ind==i])
+      m1 = sum(T[ind==i])
       m0 = m - m1
       probs=sum(That[ind==i,i])/m
-      Sf1=Sf1 + var(((That[,i]-probs)*Y)[Tr==1 & ind==i])/(m1*nfolds)
-      Sf0=Sf0 + var(((That[,i]-probs)*Y)[Tr==0 & ind==i])/(m0*nfolds)
+      Sf1=Sf1 + var(((That[,i]-probs)*Y)[T==1 & ind==i])/(m1*nfolds)
+      Sf0=Sf0 + var(((That[,i]-probs)*Y)[T==0 & ind==i])/(m0*nfolds)
       papefold = c(papefold, output$pape)
       covij = covij + (m-2)*(m-3)/(m-1)^2*tau^2*((sum(That[,i])^2-sum(That[,i])-sum(Thatmean)^2+sum(Thatmean^2))/(n*(n-1))) / nfolds
-      covijtaui = covijtaui + 2*(m-2)^2/(m-1)^2*tau*((sum(That[,i])-1)*(sum((That[,i]*Y*Tr))/((n-1)*n1)-sum((That[,i]*Y*(1-Tr)))/((n-1)*n0)) -
+      covijtaui = covijtaui + 2*(m-2)^2/(m-1)^2*tau*((sum(That[,i])-1)*(sum((That[,i]*Y*T))/((n-1)*n1)-sum((That[,i]*Y*(1-T)))/((n-1)*n0)) -
                                                        ((sum(Thatmean)*sum(ThatYT1mean)-sum(Thatmean*ThatYT1mean))/((n-1)*n1)-
                                                           (sum(Thatmean)*sum(ThatYT0mean)-sum(Thatmean*ThatYT0mean))/((n-1)*n0)))/ nfolds
-      covijtauij = covijtauij + (m^2-2*m+2)/(m-1)^2*(((sum((That[,i]*Y*Tr))^2-sum((That[,i]*Y^2*Tr)))/n1n1 -
-                                                        2*sum((That[,i]*Y*Tr))*sum(That[,i]*Y*(1-Tr))/n1n0 +
-                                                        (sum((That[,i]*Y*(1-Tr)))^2-sum((That[,i]*Y^2*(1-Tr))))/n0n0) -
+      covijtauij = covijtauij + (m^2-2*m+2)/(m-1)^2*(((sum((That[,i]*Y*T))^2-sum((That[,i]*Y^2*T)))/n1n1 -
+                                                        2*sum((That[,i]*Y*T))*sum(That[,i]*Y*(1-T))/n1n0 +
+                                                        (sum((That[,i]*Y*(1-T)))^2-sum((That[,i]*Y^2*(1-T))))/n0n0) -
                                                        ((sum(ThatYT1mean)^2-sum(ThatYT1mean^2))/n1n1 -
                                                           (2*sum(ThatYT1mean)*sum(ThatYT0mean))/n1n0 +
                                                           (sum(ThatYT0mean)^2-sum(ThatYT0mean^2))/n0n0)) / nfolds
@@ -110,30 +110,30 @@ PAPEcv <- function (Tr, That, Y, ind, plim = NA, centered = TRUE) {
   } else {
     nfolds = max(ind)
     n = length(Y)
-    n1 = sum(Tr)
+    n1 = sum(T)
     n0 = n - n1
-    papepfold = c()
+    papepfold = numeric(nfolds)
     Sfp1 = 0
     Sfp0 = 0
-    kf1 = c()
-    kf0 = c()
+    kf1 = numeric(nfolds)
+    kf0 = numeric(nfolds)
     for (i in 1:nfolds) {
-      output = PAPE(Tr[ind==i],That[ind==i,i],Y[ind==i],plim)
-      m = length(Tr[ind==i])
-      m1 = sum(Tr[ind==i])
+      output = PAPE(T[ind==i],That[ind==i,i],Y[ind==i],plim)
+      m = length(T[ind==i])
+      m1 = sum(T[ind==i])
       m0 = m - m1
       probs=sum(That[ind==i,i])/m
-      Sfp1=Sfp1 + var(((That[,i]-plim)*Y)[Tr==1 & ind==i])/(m1*nfolds)
-      Sfp0=Sfp0 + var(((That[,i]-plim)*Y)[Tr==0 & ind==i])/(m0*nfolds)
-      temp1 = mean(Y[Tr==1 & That[,i]==1 & ind==i])-mean(Y[Tr==0 & That[,i]==1 & ind==i])
-      temp0 = mean(Y[Tr==1 & That[,i]==0 & ind==i])-mean(Y[Tr==0 & That[,i]==0 & ind==i])
+      Sfp1=Sfp1 + var(((That[,i]-plim)*Y)[T==1 & ind==i])/(m1*nfolds)
+      Sfp0=Sfp0 + var(((That[,i]-plim)*Y)[T==0 & ind==i])/(m0*nfolds)
+      temp1 = mean(Y[T==1 & That[,i]==1 & ind==i])-mean(Y[T==0 & That[,i]==1 & ind==i])
+      temp0 = mean(Y[T==1 & That[,i]==0 & ind==i])-mean(Y[T==0 & That[,i]==0 & ind==i])
       if (!is.nan(temp1)) {
-        kf1 = c(kf1, temp1)
+        kf1[i] = temp1
       }
       if (!is.nan(temp0)) {
-        kf0 = c(kf0, temp0)
+        kf0[i] =temp0
       }
-      papepfold = c(papepfold, output$papep)
+      papepfold[i] = output$pape
     }
     mF = n / nfolds
     SF2 = var(papepfold)

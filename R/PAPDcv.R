@@ -4,7 +4,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param Thatfp A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the first
 #' individualized treatment rule generated in the \code{i}th fold. Please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
@@ -21,12 +21,12 @@
 #' Population Average Prescription Difference.} \item{sd}{The estimated standard deviation
 #' of PAPD.}
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 #' That2 = matrix(c(0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0), nrow = 8, ncol = 2)
 #' Y = c(4,5,0,2,4,1,-4,3)
 #' ind = c(rep(1,4),rep(2,4))
-#' papdlist <- PAPDcv(Tr, That, That2, Y, ind, plim = 0.5)
+#' papdlist <- PAPDcv(T, That, That2, Y, ind, plim = 0.5)
 #' papdlist$papd
 #' papdlist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
@@ -34,9 +34,9 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPDcv
-PAPDcv <- function (Tr, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
@@ -47,22 +47,22 @@ PAPDcv <- function (Tr, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   if (!(identical(as.numeric(Thatgp),as.numeric(as.logical(Thatgp))))) {
     stop("Thatgp should be binary.")
   }
-  if ((length(Tr)!=dim(Thatfp)[1]) | (dim(Thatfp)[1]!=dim(Thatgp)[1]) | (dim(Thatgp)[1]!=length(Y))) {
+  if ((length(T)!=dim(Thatfp)[1]) | (dim(Thatfp)[1]!=dim(Thatgp)[1]) | (dim(Thatgp)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if ((max(apply(Thatfp,2,sum))>=floor(length(Tr)*plim)+1)) {
-    stop("The number of treated units in Thatfp does not match the budget constraint.")
+  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(Thatfp[ind==i, i])))>floor(length(T)*plim)+1)) {
+    stop("The number of treated units in Thatfp should be below or equal to plim.")
   }
-  if ((max(apply(Thatgp,2,sum))>=floor(length(Tr)*plim)+1)) {
-    stop("The number of treated units in Thatgp does not match the budget constraint.")
+  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(Thatgp[ind==i, i])))>floor(length(T)*plim)+1)) {
+    stop("The number of treated units in Thatgp should be below or equal to plim.")
   }
   if (((plim<0) | (plim>1))) {
     stop("Budget constraint should be between 0 and 1")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   Thatfp=as.matrix(Thatfp)
   Thatgp=as.matrix(Thatgp)
   Y=as.numeric(Y)
@@ -71,7 +71,7 @@ PAPDcv <- function (Tr, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   }
   nfolds = max(ind)
   n = length(Y)
-  n1 = sum(Tr)
+  n1 = sum(T)
   n0 = n - n1
   papdfold = c()
   Sfgp1 = 0
@@ -81,16 +81,16 @@ PAPDcv <- function (Tr, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   kg1 = c()
   kg0 = c()
   for (i in 1:nfolds) {
-    output = PAPD(Tr[ind==i],Thatfp[ind==i,i],Thatgp[ind==i,i], Y[ind==i],plim)
-    m = length(Tr[ind==i])
-    m1 = sum(Tr[ind==i])
+    output = PAPD(T[ind==i],Thatfp[ind==i,i],Thatgp[ind==i,i], Y[ind==i],plim)
+    m = length(T[ind==i])
+    m1 = sum(T[ind==i])
     m0 = m - m1
-    Sfgp1=Sfgp1 + var(((Thatfp[,i]-Thatgp[,i])*Y)[Tr==1 & ind==i])/(m1*nfolds)
-    Sfgp0=Sfgp0 + var(((Thatfp[,i]-Thatgp[,i])*Y)[Tr==0 & ind==i])/(m0*nfolds)
-    tempf1 = mean(Y[Tr==1 & Thatfp[,i]==1 & ind ==i])-mean(Y[Tr==0 & Thatfp[,i]==1 & ind ==i])
-    tempf0 = mean(Y[Tr==1 & Thatfp[,i]==0 & ind ==i])-mean(Y[Tr==0 & Thatfp[,i]==0 & ind ==i])
-    tempg1 = mean(Y[Tr==1 & Thatgp[,i]==1 & ind ==i])-mean(Y[Tr==0 & Thatgp[,i]==1 & ind ==i])
-    tempg0 = mean(Y[Tr==1 & Thatgp[,i]==0 & ind ==i])-mean(Y[Tr==0 & Thatgp[,i]==0 & ind ==i])
+    Sfgp1=Sfgp1 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==1 & ind==i])/(m1*nfolds)
+    Sfgp0=Sfgp0 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==0 & ind==i])/(m0*nfolds)
+    tempf1 = mean(Y[T==1 & Thatfp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==1 & ind ==i])
+    tempf0 = mean(Y[T==1 & Thatfp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==0 & ind ==i])
+    tempg1 = mean(Y[T==1 & Thatgp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==1 & ind ==i])
+    tempg0 = mean(Y[T==1 & Thatgp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==0 & ind ==i])
     if (!is.nan(tempf1)) {
       kf1 = c(kf1, tempf1)
     }

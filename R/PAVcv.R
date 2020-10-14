@@ -4,7 +4,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
 #' individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
@@ -16,11 +16,11 @@
 #' Population Average Value.} \item{sd}{The estimated standard deviation
 #' of PAV.}
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 #' Y = c(4,5,0,2,4,1,-4,3)
 #' ind = c(rep(1,4),rep(2,4))
-#' pavlist <- PAVcv(Tr, That, Y, ind)
+#' pavlist <- PAVcv(T, That, Y, ind)
 #' pavlist$pav
 #' pavlist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
@@ -28,9 +28,9 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAVcv
-PAVcv <- function (Tr, That, Y, ind, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+PAVcv <- function (T, That, Y, ind, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
@@ -38,13 +38,13 @@ PAVcv <- function (Tr, That, Y, ind, centered = TRUE) {
   if (!(identical(as.numeric(That),as.numeric(as.logical(That))))) {
     stop("That should be binary.")
   }
-  if ((length(Tr)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
+  if ((length(T)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   That=as.matrix(That)
   Y=as.numeric(Y)
   if (centered) {
@@ -52,7 +52,7 @@ PAVcv <- function (Tr, That, Y, ind, centered = TRUE) {
   }
   nfolds = max(ind)
   n = length(Y)
-  n1 = sum(Tr)
+  n1 = sum(T)
   n0 = n - n1
   pavfold = c()
   sdfold = c()
@@ -62,21 +62,21 @@ PAVcv <- function (Tr, That, Y, ind, centered = TRUE) {
   n1n1 = n1*(n1-1)
   n1n0 = n0*n1
   n0n0 = n0*(n0-1)
-  ThatYT1mean = apply(That*Y*Tr,1,mean)
-  ThatYT0mean = apply(That*Y*(1-Tr),1,mean)
+  ThatYT1mean = apply(That*Y*T,1,mean)
+  ThatYT0mean = apply(That*Y*(1-T),1,mean)
   for (i in 1:nfolds) {
-    output = PAV(Tr[ind==i],That[ind==i,i],Y[ind==i])
-    m = length(Tr[ind==i])
-    m1 = sum(Tr[ind==i])
+    output = PAV(T[ind==i],That[ind==i,i],Y[ind==i])
+    m = length(T[ind==i])
+    m1 = sum(T[ind==i])
     m0 = m - m1
     probs=sum(That[ind==i,i])/m
-    Sf1=Sf1 + var((That[,i]*Y)[Tr==1 & ind==i])/(m1*nfolds)
-    Sf0=Sf0 + var(((1-That[,i])*Y)[Tr==0 & ind==i])/(m0*nfolds)
+    Sf1=Sf1 + var((That[,i]*Y)[T==1 & ind==i])/(m1*nfolds)
+    Sf0=Sf0 + var(((1-That[,i])*Y)[T==0 & ind==i])/(m0*nfolds)
     pavfold = c(pavfold, output$pav)
     sdfold = c(sdfold, output$sd)
-    covijtauij = covijtauij + (((sum((That[,i]*Y*Tr))^2-sum((That[,i]*Y^2*Tr)))/n1n1 -
-                                  2*sum((That[,i]*Y*Tr))*sum(That[,i]*Y*(1-Tr))/n1n0 +
-                                  (sum((That[,i]*Y*(1-Tr)))^2-sum((That[,i]*Y^2*(1-Tr))))/n0n0) -
+    covijtauij = covijtauij + (((sum((That[,i]*Y*T))^2-sum((That[,i]*Y^2*T)))/n1n1 -
+                                  2*sum((That[,i]*Y*T))*sum(That[,i]*Y*(1-T))/n1n0 +
+                                  (sum((That[,i]*Y*(1-T)))^2-sum((That[,i]*Y^2*(1-T))))/n0n0) -
                                  ((sum(ThatYT1mean)^2-sum(ThatYT1mean^2))/n1n1 -
                                     (2*sum(ThatYT1mean)*sum(ThatYT0mean))/n1n0 +
                                     (sum(ThatYT0mean)^2-sum(ThatYT0mean^2))/n0n0)) / nfolds

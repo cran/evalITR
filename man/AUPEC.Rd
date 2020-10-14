@@ -4,10 +4,10 @@
 \alias{AUPEC}
 \title{Estimation of the Area Under Prescription Evaluation Curve (AUPEC) in Randomized Experiments}
 \usage{
-AUPEC(Tr, tau, Y, centered = TRUE)
+AUPEC(T, tau, Y, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{tau}{A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should
 not have treatment. Conditional Average Treatment Effect is one possible measure.}
@@ -20,18 +20,20 @@ the variance of the estimator. Default is \code{TRUE}.}
 \value{
 A list that contains the following items: \item{aupec}{The estimated
 Area Under Prescription Evaluation Curve} \item{sd}{The estimated standard deviation
-of AUPEC.}
+of AUPEC.}\item{vec}{A vector of points outlining the AUPEC curve across each possible budget point for the dataset.
+Each step increases the budget by 1/n where n is the number of data points. }
 }
 \description{
 This function estimates AUPEC. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 tau = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7)
 Y = c(4,5,0,2,4,1,-4,3)
-aupeclist <- AUPEC(Tr,tau,Y)
+aupeclist <- AUPEC(T,tau,Y)
 aupeclist$aupec
 aupeclist$sd
+aupeclist$vec
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

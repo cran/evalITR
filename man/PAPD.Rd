@@ -4,10 +4,10 @@
 \alias{PAPD}
 \title{Estimation of the Population Average Prescription Difference in Randomized Experiments}
 \usage{
-PAPD(Tr, Thatfp, Thatgp, Y, plim, centered = TRUE)
+PAPD(T, Thatfp, Thatgp, Y, plim, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{Thatfp}{A vector of the unit-level binary treatment that would have been assigned by the
 first individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
@@ -33,11 +33,11 @@ This function estimates the Population Average Prescription Difference with a bu
 constraint. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 That2 = c(1,0,0,1,1,0,0,1)
 Y = c(4,5,0,2,4,1,-4,3)
-papdlist <- PAPD(Tr,That,That2,Y,plim = 0.5)
+papdlist <- PAPD(T,That,That2,Y,plim = 0.5)
 papdlist$papd
 papdlist$sd
 }

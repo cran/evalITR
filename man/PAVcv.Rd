@@ -4,10 +4,10 @@
 \alias{PAVcv}
 \title{Estimation of the Population Average Value in Randomized Experiments Under Cross Validation}
 \usage{
-PAVcv(Tr, That, Y, ind, centered = TRUE)
+PAVcv(T, That, Y, ind, centered = TRUE)
 }
 \arguments{
-\item{Tr}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
 individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
@@ -29,11 +29,11 @@ of PAV.}
 This function estimates the Population Average Value. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
-Tr = c(1,0,1,0,1,0,1,0)
+T = c(1,0,1,0,1,0,1,0)
 That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 Y = c(4,5,0,2,4,1,-4,3)
 ind = c(rep(1,4),rep(2,4))
-pavlist <- PAVcv(Tr, That, Y, ind)
+pavlist <- PAVcv(T, That, Y, ind)
 pavlist$pav
 pavlist$sd
 }

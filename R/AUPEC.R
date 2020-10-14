@@ -4,7 +4,7 @@
 #'
 #'
 #'
-#' @param Tr A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param tau A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should
 #' not have treatment. Conditional Average Treatment Effect is one possible measure.
 #' @param Y A vector of the outcome variable of interest for each sample.
@@ -12,40 +12,43 @@
 #' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{aupec}{The estimated
 #' Area Under Prescription Evaluation Curve} \item{sd}{The estimated standard deviation
-#' of AUPEC.}
+#' of AUPEC.}\item{vec}{A vector of points outlining the AUPEC curve across each possible budget point for the dataset.
+#' Each step increases the budget by 1/n where n is the number of data points. }
 #' @examples
-#' Tr = c(1,0,1,0,1,0,1,0)
+#' T = c(1,0,1,0,1,0,1,0)
 #' tau = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7)
 #' Y = c(4,5,0,2,4,1,-4,3)
-#' aupeclist <- AUPEC(Tr,tau,Y)
+#' aupeclist <- AUPEC(T,tau,Y)
 #' aupeclist$aupec
 #' aupeclist$sd
+#' aupeclist$vec
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export AUPEC
-AUPEC <- function (Tr, tau, Y, centered = TRUE) {
-  if (!(identical(as.numeric(Tr),as.numeric(as.logical(Tr))))) {
-    stop("Treatment should be binary.")
+AUPEC <- function (T, tau, Y, centered = TRUE) {
+  if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
+    stop("T should be binary.")
   }
-  if ((length(Tr)!=length(tau)) | (length(tau)!=length(Y))) {
+  if ((length(T)!=length(tau)) | (length(tau)!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (length(Tr)==0) {
+  if (length(T)==0) {
     stop("The data should have positive length.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
   }
-  Tr=as.numeric(Tr)
+  T=as.numeric(T)
   tau=as.numeric(tau)
   Y=as.numeric(Y)
+  meanY = mean(Y)
   if (centered) {
-    Y = Y - mean(Y)
+    Y = Y - meanY
   }
   n=length(Y)
-  n1=sum(Tr)
+  n1=sum(T)
   n0=n-n1
   pf=sum(as.numeric(tau>0))/n
   if (pf>0) {
@@ -58,16 +61,18 @@ AUPEC <- function (Tr, tau, Y, centered = TRUE) {
     kAf1B=numeric(n)
     kAf0A=numeric(n)
     kAf0B=numeric(n)
+    AUPECvec=numeric(n)
     covarsum=0
     for (i in 1:n) {
       cutofftemp=quantile(tau,1-i/n)
       Thatftemp=as.numeric(tau>cutofftemp)
       ThatftempA=as.numeric(tau>max(cutofftemp,0))
+      AUPECvec[i]=1/n1*sum(T*ThatftempA*Y)+1/n0*sum(Y*(1-T)*(1-ThatftempA))
       ThatfA=ThatfA+1/n*ThatftempA
       cutofftemp2=quantile(tau,(i-1)/n)
       Thatftemp2=as.numeric(tau>cutofftemp2)
-      tempkAf1=mean(Y[Tr==1 & Thatftemp2==1])-mean(Y[Tr==0 & Thatftemp2==1])
-      tempkAf0=mean(Y[Tr==1 & Thatftemp==0])-mean(Y[Tr==0 & Thatftemp==0])
+      tempkAf1=mean(Y[T==1 & Thatftemp2==1])-mean(Y[T==0 & Thatftemp2==1])
+      tempkAf0=mean(Y[T==1 & Thatftemp==0])-mean(Y[T==0 & Thatftemp==0])
       if (is.nan(tempkAf1)) {
         kAf1[n-i+1]=kAf1[n-i+2]
       } else {
@@ -93,14 +98,16 @@ AUPEC <- function (Tr, tau, Y, centered = TRUE) {
                    -2*(n-Z)^2/(n^4*(n-1))*kAf1[Z]*sumtemp2[Z]+1/n^4*sumtemp3[Z])
     covarsum2=var(1/n*(sumtemp2[Z]/n+(n-Z)*Z/n*kAf1[Z]))
     ThatfA2=ThatfA-1/2
-    SfA1=var((ThatfA2*Y)[Tr==1])
-    SfA0=var((ThatfA2*Y)[Tr==0])
+    SfA1=var((ThatfA2*Y)[T==1])
+    SfA0=var((ThatfA2*Y)[T==0])
     varfA=SfA1/n1+SfA0/n0+covarsum1+covarsum2
-    AUPEC=1/n1*sum(Tr*ThatfA*Y)+1/n0*sum(Y*(1-Tr)*(1-ThatfA))-0.5/n1*sum(Tr*Y)-0.5/n0*sum((1-Tr)*Y)
-    return(list(aupec=AUPEC,sd=sqrt(max(varfA,0))))
+    AUPEC=1/n1*sum(T*ThatfA*Y)+1/n0*sum(Y*(1-T)*(1-ThatfA))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
+    return(list(aupec=AUPEC,sd=sqrt(max(varfA,0)),vec=AUPECvec))
   } else {
-    AUPEC=1/n0*sum(Y*(1-Tr))-0.5/n1*sum(Tr*Y)-0.5/n0*sum((1-Tr)*Y)
-    return(list(aupec=AUPEC,sd=0))
+    AUPEC=1/n0*sum(Y*(1-T))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
+    AUPECvec=numeric(n)
+    AUPECvec[]=1/n0*sum(Y*(1-T))
+    return(list(aupec=AUPEC,sd=0,vec=AUPECvec+meanY))
   }
 }
 
