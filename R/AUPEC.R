@@ -43,9 +43,8 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
   T=as.numeric(T)
   tau=as.numeric(tau)
   Y=as.numeric(Y)
-  meanY = mean(Y)
   if (centered) {
-    Y = Y - meanY
+    Y = Y - mean(Y)
   }
   n=length(Y)
   n1=sum(T)
@@ -107,7 +106,7 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
     AUPEC=1/n0*sum(Y*(1-T))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
     AUPECvec=numeric(n)
     AUPECvec[]=1/n0*sum(Y*(1-T))
-    return(list(aupec=AUPEC,sd=0,vec=AUPECvec+meanY))
+    return(list(aupec=AUPEC,sd=0,vec=AUPECvec))
   }
 }
 
