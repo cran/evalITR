@@ -1,6 +1,6 @@
 Package: evalITR
-Version: 0.2.1
-Date: 2021-07-07
+Version: 0.2.2
+Date: 2021-10-15
 Title: Evaluating Individualized Treatment Rules
 Authors@R: c(
   person("Michael Lingzhi", "Li", , "mlli@mit.edu", c("aut", "cre")),
@@ -15,8 +15,8 @@ BugReports: https://github.com/MichaelLLi/evalITR/issues
 RoxygenNote: 7.1.1
 Suggests: testthat
 NeedsCompilation: no
-Packaged: 2021-07-07 18:52:46 UTC; Michael Li
+Packaged: 2021-10-16 01:04:42 UTC; shazn
 Author: Michael Lingzhi Li [aut, cre],
   Kosuke Imai [aut]
 Repository: CRAN
-Date/Publication: 2021-07-07 19:40:08 UTC
+Date/Publication: 2021-10-16 04:40:02 UTC
