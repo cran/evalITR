@@ -4,18 +4,18 @@
 \alias{PAPE}
 \title{Estimation of the Population Average Prescription Effect in Randomized Experiments}
 \usage{
-PAPE(T, That, Y, plim = NA, centered = TRUE)
+PAPE(T, That, Y, budget = NA, centered = TRUE)
 }
 \arguments{
 \item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A vector of the unit-level binary treatment that would have been assigned by the
-individualized treatment rule. If \code{plim} is specified, please ensure
+individualized treatment rule. If \code{budget} is specified, please ensure
 that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{A vector of the outcome variable of interest for each sample.}
 
-\item{plim}{The maximum percentage of population that can be treated under the
+\item{budget}{The maximum percentage of population that can be treated under the
 budget constraint. Should be a decimal between 0 and 1. Default is NA which assumes
 no budget constraint.}
 
@@ -43,7 +43,7 @@ papelist$sd
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 }
 \author{
-Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+\email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 }
 \keyword{evaluation}

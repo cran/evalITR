@@ -10,7 +10,7 @@ PAVcv(T, That, Y, ind, centered = TRUE)
 \item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
-individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
+individualized treatment rule generated in the \code{i}th fold. If \code{budget} is specified, please ensure
 that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{The outcome variable of interest.}
@@ -41,7 +41,7 @@ pavlist$sd
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 }
 \author{
-Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+\email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 }
 \keyword{evaluation}

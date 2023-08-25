@@ -6,7 +6,7 @@
 #'
 #' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A vector of the unit-level binary treatment that would have been assigned by the
-#' individualized treatment rule. If \code{plim} is specified, please ensure
+#' individualized treatment rule. If \code{budget} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
 #' @param Y A vector of the outcome variable of interest for each sample.
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -21,8 +21,8 @@
 #' pavlist <- PAV(T,That,Y)
 #' pavlist$pav
 #' pavlist$sd
-#' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+#' @author Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+#' \email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAV

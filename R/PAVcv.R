@@ -6,7 +6,7 @@
 #'
 #' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
-#' individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
+#' individualized treatment rule generated in the \code{i}th fold. If \code{budget} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
 #' @param Y The outcome variable of interest.
 #' @param ind A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.
@@ -23,8 +23,8 @@
 #' pavlist <- PAVcv(T, That, Y, ind)
 #' pavlist$pav
 #' pavlist$sd
-#' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+#' @author Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+#' \email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAVcv

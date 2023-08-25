@@ -1,24 +1,12 @@
-# v0.3.0 - Release Notes
+# evalITR 1.0.0
 
-- Add GATE/GATEcv Evaluation Functions
-- Add Functions for testing statistics het.test, hetcv.test, consist.test, consistcv.test
-
-# v0.2.2 - Release Notes
-
-- Fixing further bugs when using budget condition on PAPD/PAPE
-
-# v0.2.1 - Release Notes
-
-- Fixing bugs when using budget condition on PAPD/PAPE
-
-# v0.2 - Release Notes
-
-- Added Curve Output for AUPEC
-- Changed threshold for budget condition checks for PAPE and PAPD
-- Changed variance output in cases of negative variance estimation to output 0 variance for PAPE and PAPD
+- Revamped package structure
+- Introduced the high-level function estimate_itr() to provide a easy process to train and evaluate individualized treatment rules.
+- Added support for automatic training of many machine learning algorithms including Caret, Superlearner, BART, and Causal Forests.
+- Provided plotting tools that automatically creates beautiful plots for evaluation metrics
+- Changed output structure to provide more detailed information on evaluation metrics and confidence intervals, integrates with summary() function.
 
 
-# v0.1 - Release Notes
+# evalITR 0.3.0
 
-- Added Evaluation Functions for PAV, PAPE, PAPD, and AUPEC
-- Added Evaluation Functions for PAVcv, PAPEcv, PAPDcv, and AUPECcv
+* Added a `NEWS.md` file to track changes to the package.
